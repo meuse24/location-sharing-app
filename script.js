@@ -134,10 +134,36 @@ class LocationApp {
     shareLocation() {
         if (!this.currentLocation) return;
 
+        const { latitude, longitude, accuracy } = this.currentLocation;
+        
+        // Alle Koordinatenformate generieren
+        const decimalCoords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        const dmsLat = this.decimalToDMS(latitude, 'lat');
+        const dmsLng = this.decimalToDMS(longitude, 'lng');
+        const dmsCoords = `${dmsLat}, ${dmsLng}`;
+        const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        
+        // Formatierte Nachricht mit allen Formaten
+        const shareText = `📍 Mein Standort
+
+` +
+            `🎯 Koordinaten (Dezimal):
+${decimalCoords}
+
+` +
+            `🧭 Koordinaten (Grad/Min/Sek):
+${dmsCoords}
+
+` +
+            `🗺 Google Maps:
+${googleMapsUrl}
+
+` +
+            `🎯 Genauigkeit: ±${Math.round(accuracy)}m`;
+
         const shareData = {
             title: 'Mein Standort',
-            text: `Meine aktuelle Position: ${this.currentLocation.latitude.toFixed(6)}, ${this.currentLocation.longitude.toFixed(6)}`,
-            url: `https://www.google.com/maps?q=${this.currentLocation.latitude},${this.currentLocation.longitude}`
+            text: shareText
         };
 
         if (navigator.share) {
@@ -151,12 +177,12 @@ class LocationApp {
     }
 
     fallbackShare(shareData) {
-        const shareText = `${shareData.text}\n${shareData.url}`;
+        const shareText = shareData.text;
         
         if (navigator.clipboard) {
             navigator.clipboard.writeText(shareText)
                 .then(() => {
-                    alert('Standortdaten in Zwischenablage kopiert!');
+                    alert('Alle Standortdaten in Zwischenablage kopiert!');
                 })
                 .catch(() => {
                     this.showShareOptions(shareText);
