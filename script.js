@@ -1,0 +1,268 @@
+class LocationApp {
+    constructor() {
+        this.currentLocation = null;
+        this.init();
+    }
+
+    init() {
+        const getLocationBtn = document.getElementById('getLocationBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        
+        getLocationBtn.addEventListener('click', () => this.getCurrentLocation());
+        shareBtn.addEventListener('click', () => this.shareLocation());
+    }
+
+    getCurrentLocation() {
+        if (!navigator.geolocation) {
+            this.showError('Geolocation wird von diesem Browser nicht unterstützt.');
+            return;
+        }
+
+        const getLocationBtn = document.getElementById('getLocationBtn');
+        getLocationBtn.textContent = 'Standort wird abgerufen...';
+        getLocationBtn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => this.onLocationSuccess(position),
+            (error) => this.onLocationError(error),
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    onLocationSuccess(position) {
+        this.currentLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy
+        };
+
+        this.displayLocation();
+        this.resetButton();
+        this.hideError();
+    }
+
+    onLocationError(error) {
+        let errorMessage = 'Fehler beim Abrufen des Standorts: ';
+        
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                errorMessage += 'Standortzugriff wurde verweigert.';
+                break;
+            case error.POSITION_UNAVAILABLE:
+                errorMessage += 'Standortinformationen sind nicht verfügbar.';
+                break;
+            case error.TIMEOUT:
+                errorMessage += 'Zeitüberschreitung beim Abrufen des Standorts.';
+                break;
+            default:
+                errorMessage += 'Ein unbekannter Fehler ist aufgetreten.';
+                break;
+        }
+        
+        this.showError(errorMessage);
+        this.resetButton();
+    }
+
+    displayLocation() {
+        const { latitude, longitude } = this.currentLocation;
+        
+        // Dezimalformat
+        document.getElementById('decimal').textContent = 
+            `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        
+        // Grad, Minuten, Sekunden Format
+        const dmsLat = this.decimalToDMS(latitude, 'lat');
+        const dmsLng = this.decimalToDMS(longitude, 'lng');
+        document.getElementById('dms').textContent = `${dmsLat}, ${dmsLng}`;
+        
+        // Google Maps Link
+        const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        document.getElementById('googleMaps').innerHTML = 
+            `<a href="${googleMapsUrl}" target="_blank">${googleMapsUrl}</a>`;
+        
+        // What3Words Hinweis basierend auf Genauigkeit
+        const what3wordsEl = document.getElementById('what3words');
+        if (this.currentLocation.accuracy > 100) {
+            what3wordsEl.textContent = 'Standort zu ungenau für What3Words (Genauigkeit: ' + 
+                Math.round(this.currentLocation.accuracy) + 'm)';
+        } else {
+            what3wordsEl.textContent = 'What3Words: Für genaue Adresse What3Words App verwenden';
+        }
+
+        document.getElementById('locationInfo').classList.remove('hidden');
+    }
+
+    decimalToDMS(decimal, type) {
+        const absolute = Math.abs(decimal);
+        const degrees = Math.floor(absolute);
+        const minutesFloat = (absolute - degrees) * 60;
+        const minutes = Math.floor(minutesFloat);
+        const seconds = Math.round((minutesFloat - minutes) * 60 * 100) / 100;
+        
+        let direction;
+        if (type === 'lat') {
+            direction = decimal >= 0 ? 'N' : 'S';
+        } else {
+            direction = decimal >= 0 ? 'O' : 'W';
+        }
+        
+        return `${degrees}° ${minutes}' ${seconds}" ${direction}`;
+    }
+
+    shareLocation() {
+        if (!this.currentLocation) return;
+
+        const shareData = {
+            title: 'Mein Standort',
+            text: `Meine aktuelle Position: ${this.currentLocation.latitude.toFixed(6)}, ${this.currentLocation.longitude.toFixed(6)}`,
+            url: `https://www.google.com/maps?q=${this.currentLocation.latitude},${this.currentLocation.longitude}`
+        };
+
+        if (navigator.share) {
+            navigator.share(shareData)
+                .then(() => console.log('Standort erfolgreich geteilt'))
+                .catch((error) => console.log('Fehler beim Teilen:', error));
+        } else {
+            // Fallback für Browser ohne Web Share API
+            this.fallbackShare(shareData);
+        }
+    }
+
+    fallbackShare(shareData) {
+        const shareText = `${shareData.text}\n${shareData.url}`;
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(shareText)
+                .then(() => {
+                    alert('Standortdaten in Zwischenablage kopiert!');
+                })
+                .catch(() => {
+                    this.showShareOptions(shareText);
+                });
+        } else {
+            this.showShareOptions(shareText);
+        }
+    }
+
+    showShareOptions(shareText) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center;
+            justify-content: center; z-index: 1000;
+        `;
+        
+        modal.innerHTML = `
+            <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 400px; width: 90%;">
+                <h3>Standort teilen</h3>
+                <textarea readonly style="width: 100%; height: 100px; margin: 1rem 0; padding: 0.5rem;">${shareText}</textarea>
+                <div style="text-align: center;">
+                    <button onclick="this.closest('div').parentElement.remove()" 
+                            style="padding: 0.5rem 1rem; margin: 0.25rem; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Schließen
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+
+    resetButton() {
+        const getLocationBtn = document.getElementById('getLocationBtn');
+        getLocationBtn.textContent = 'Standort erneut abrufen';
+        getLocationBtn.disabled = false;
+    }
+
+    showError(message) {
+        const errorEl = document.getElementById('error');
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+    }
+
+    hideError() {
+        document.getElementById('error').classList.add('hidden');
+    }
+}
+
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    let textToCopy = element.textContent;
+    
+    if (elementId === 'googleMaps') {
+        const link = element.querySelector('a');
+        if (link) {
+            textToCopy = link.href;
+        }
+    }
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                showCopyFeedback();
+            })
+            .catch(err => {
+                console.error('Fehler beim Kopieren:', err);
+                fallbackCopyToClipboard(textToCopy);
+            });
+    } else {
+        fallbackCopyToClipboard(textToCopy);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopyFeedback();
+        } else {
+            alert('Kopieren fehlgeschlagen. Text manuell auswählen und kopieren.');
+        }
+    } catch (err) {
+        console.error('Fallback-Kopieren fehlgeschlagen:', err);
+        alert('Kopieren nicht möglich. Text manuell auswählen und kopieren.');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function showCopyFeedback() {
+    const feedback = document.createElement('div');
+    feedback.textContent = 'In Zwischenablage kopiert!';
+    feedback.style.cssText = `
+        position: fixed; top: 20px; right: 20px; background: #48bb78;
+        color: white; padding: 1rem; border-radius: 5px; z-index: 1000;
+        animation: fadeInOut 2s ease-in-out;
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(-10px); }
+            20%, 80% { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(feedback);
+    
+    setTimeout(() => {
+        document.body.removeChild(feedback);
+        document.head.removeChild(style);
+    }, 2000);
+}
+
+// App initialisieren
+document.addEventListener('DOMContentLoaded', () => {
+    new LocationApp();
+});

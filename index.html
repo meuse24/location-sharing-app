@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standort Teilen</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Mein Standort</h1>
+        
+        <button id="getLocationBtn" class="btn-primary">Standort abrufen</button>
+        
+        <div id="locationInfo" class="location-info hidden">
+            <h2>Aktuelle Position:</h2>
+            
+            <div class="format-section">
+                <h3>Koordinaten (Dezimal)</h3>
+                <div id="decimal" class="coordinate-display"></div>
+                <button class="copy-btn" onclick="copyToClipboard('decimal')">Kopieren</button>
+            </div>
+            
+            <div class="format-section">
+                <h3>Koordinaten (Grad, Minuten, Sekunden)</h3>
+                <div id="dms" class="coordinate-display"></div>
+                <button class="copy-btn" onclick="copyToClipboard('dms')">Kopieren</button>
+            </div>
+            
+            <div class="format-section">
+                <h3>Google Maps Link</h3>
+                <div id="googleMaps" class="coordinate-display"></div>
+                <button class="copy-btn" onclick="copyToClipboard('googleMaps')">Kopieren</button>
+            </div>
+            
+            <div class="format-section">
+                <h3>What3Words (falls verfügbar)</h3>
+                <div id="what3words" class="coordinate-display">Standort zu ungenau für What3Words</div>
+            </div>
+            
+            <div class="share-section">
+                <h3>Teilen:</h3>
+                <button id="shareBtn" class="btn-secondary">Über Gerät teilen</button>
+            </div>
+        </div>
+        
+        <div id="error" class="error hidden"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
