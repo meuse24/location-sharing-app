@@ -377,7 +377,7 @@ body {
 
 /* Map Styles */
 .map-container {
-  height: clamp(250px, 40vh, 400px);
+  height: 400px;
   width: 100%;
   border-radius: var(--radius-lg);
   border: 1px solid var(--gray-300);
@@ -389,10 +389,17 @@ body {
 }
 
 #map {
-  height: 100%;
+  height: 400px;
   width: 100%;
   border-radius: var(--radius-lg);
   background: var(--gray-100);
+  border: none;
+}
+
+.leaflet-container {
+  height: 400px !important;
+  width: 100% !important;
+  border-radius: var(--radius-lg);
 }
 
 .map-controls {
@@ -403,7 +410,7 @@ body {
 }
 
 .map-placeholder {
-  height: 100%;
+  height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -413,6 +420,13 @@ body {
   border-radius: var(--radius-lg);
   text-align: center;
   padding: var(--space-lg);
+  border: 1px solid var(--gray-300);
+}
+
+@media (max-width: 768px) {
+  .map-placeholder {
+    height: 350px;
+  }
 }
 
 /* Share Section */
@@ -525,7 +539,12 @@ body {
   }
   
   .map-container {
-    height: clamp(200px, 35vh, 300px);
+    height: 350px;
+  }
+  
+  #map,
+  .leaflet-container {
+    height: 350px !important;
   }
   
   .feature-grid {

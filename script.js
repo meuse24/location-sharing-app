@@ -266,18 +266,33 @@ ${googleMapsUrl}
                 this.map.remove();
             }
             
-            // Neue Karte erstellen
-            this.map = L.map('map').setView([defaultLat, defaultLng], 13);
+            // Neue Karte erstellen mit besseren Optionen
+            this.map = L.map('map', {
+                zoomControl: true,
+                scrollWheelZoom: true,
+                doubleClickZoom: true,
+                boxZoom: true,
+                keyboard: true,
+                dragging: true,
+                touchZoom: true
+            }).setView([defaultLat, defaultLng], 13);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
+                maxZoom: 19,
+                minZoom: 3
             }).addTo(this.map);
             
-            // Karten-Größe nach kurzer Verzögerung korrigieren
+            // Karten-Größe mehrfach korrigieren für bessere Darstellung
             setTimeout(() => {
                 if (this.map) {
-                    this.map.invalidateSize();
+                    this.map.invalidateSize(true);
+                    // Nochmal nach DOM-Update
+                    setTimeout(() => {
+                        if (this.map) {
+                            this.map.invalidateSize(true);
+                        }
+                    }, 200);
                 }
             }, 100);
             
