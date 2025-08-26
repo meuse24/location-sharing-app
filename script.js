@@ -4,7 +4,7 @@ class LocationApp {
         this.map = null;
         this.marker = null;
         this.mapVisible = true;
-        this.theme = localStorage.getItem('theme') || 'light';
+        this.theme = localStorage.getItem('theme') || 'dark';
         this.init();
     }
 
@@ -417,12 +417,13 @@ ${googleMapsUrl}
         document.documentElement.setAttribute('data-theme', this.theme);
         localStorage.setItem('theme', this.theme);
         this.updateThemeToggle();
-        this.showNotification(`${this.theme === 'dark' ? '🌙 Dark' : '☀️ Light'} Mode aktiviert`);
+        this.showNotification(`${this.theme === 'dark' ? '🌙 Dark' : '☀️ Light'} Mode aktiviert`, 'success');
     }
 
     updateThemeToggle() {
         const themeToggle = document.getElementById('themeToggle');
         themeToggle.textContent = this.theme === 'light' ? '🌙' : '☀️';
+        themeToggle.style.fontSize = '1.2rem';
         themeToggle.setAttribute('aria-label', `Zu ${this.theme === 'light' ? 'Dark' : 'Light'} Mode wechseln`);
     }
 
