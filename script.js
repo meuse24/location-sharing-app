@@ -201,6 +201,12 @@ class LocationApp {
     }
 
     initMap() {
+        // Warten bis DOM bereit ist
+        if (!document.getElementById('map')) {
+            setTimeout(() => this.initMap(), 100);
+            return;
+        }
+        
         // Standardposition (Berlin) falls noch kein Standort verfügbar
         const defaultLat = 52.5200;
         const defaultLng = 13.4050;
@@ -213,8 +219,7 @@ class LocationApp {
                 maxZoom: 19
             }).addTo(this.map);
             
-            // Karte anfangs ausblenden
-            this.toggleMap();
+            console.log('Karte erfolgreich initialisiert');
             
         } catch (error) {
             console.error('Fehler beim Initialisieren der Karte:', error);
@@ -275,28 +280,32 @@ class LocationApp {
     }
 
     toggleMap() {
-        const mapContainer = document.querySelector('.format-section:has(#map)');
+        const mapContainer = document.getElementById('map');
         const toggleBtn = document.getElementById('toggleMapBtn');
         
+        if (!mapContainer || !toggleBtn) return;
+        
         if (this.mapVisible) {
-            mapContainer.classList.add('map-hidden');
+            // Karte ausblenden
+            mapContainer.style.display = 'none';
+            mapContainer.innerHTML = '<div style="height: 100%; display: flex; align-items: center; justify-content: center; color: #718096; background: #f7fafc; border-radius: 8px;">Karte ist ausgeblendet</div>';
             toggleBtn.textContent = 'Karte einblenden';
-            document.getElementById('map').innerHTML = '<div style="height: 100%; display: flex; align-items: center; justify-content: center; color: #718096;">Karte ist ausgeblendet</div>';
+            this.mapVisible = false;
         } else {
-            mapContainer.classList.remove('map-hidden');
+            // Karte einblenden
+            mapContainer.style.display = 'block';
+            mapContainer.innerHTML = '';
             toggleBtn.textContent = 'Karte ausblenden';
-            // Karte neu initialisieren wenn eingeblendet
+            this.mapVisible = true;
+            
+            // Karte neu initialisieren
             setTimeout(() => {
-                if (this.map) {
-                    this.map.invalidateSize();
-                    if (this.currentLocation) {
-                        this.updateMap();
-                    }
+                this.initMap();
+                if (this.currentLocation) {
+                    this.updateMap();
                 }
             }, 100);
         }
-        
-        this.mapVisible = !this.mapVisible;
     }
 }
 
