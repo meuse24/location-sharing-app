@@ -102,10 +102,16 @@ class LocationApp {
             what3wordsEl.textContent = 'What3Words: Für genaue Adresse What3Words App verwenden';
         }
         
-        // Karte aktualisieren
-        this.updateMap();
-
+        // locationInfo anzeigen
         document.getElementById('locationInfo').classList.remove('hidden');
+        
+        // Karte aktualisieren und Größe korrigieren nach DOM-Update
+        setTimeout(() => {
+            this.updateMap();
+            if (this.map) {
+                this.map.invalidateSize();
+            }
+        }, 100);
     }
 
     decimalToDMS(decimal, type) {
@@ -235,6 +241,13 @@ class LocationApp {
                 maxZoom: 19
             }).addTo(this.map);
             
+            // Karten-Größe nach kurzer Verzögerung korrigieren
+            setTimeout(() => {
+                if (this.map) {
+                    this.map.invalidateSize();
+                }
+            }, 100);
+            
             console.log('Karte erfolgreich initialisiert');
             
         } catch (error) {
@@ -247,6 +260,9 @@ class LocationApp {
         if (!this.map || !this.currentLocation) return;
         
         const { latitude, longitude, accuracy } = this.currentLocation;
+        
+        // Karten-Größe vor Update korrigieren
+        this.map.invalidateSize();
         
         // Karte zur neuen Position bewegen
         this.map.setView([latitude, longitude], 15);
