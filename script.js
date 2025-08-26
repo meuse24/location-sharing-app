@@ -4,7 +4,7 @@ class LocationApp {
         this.map = null;
         this.marker = null;
         this.mapVisible = true;
-        this.theme = localStorage.getItem('theme') || 'light';
+        this.theme = localStorage.getItem('theme') || 'dark';
         this.init();
     }
 
@@ -32,6 +32,11 @@ class LocationApp {
             return;
         }
 
+        // Warnung bei file:// Protocol
+        if (location.protocol === 'file:') {
+            this.showNotification('⚠️ Für persistente Berechtigungen bitte über HTTPS oder localhost öffnen', 'warning');
+        }
+
         const getLocationBtn = document.getElementById('getLocationBtn');
         getLocationBtn.innerHTML = '🔄 Standort wird abgerufen...';
         getLocationBtn.disabled = true;
@@ -43,7 +48,7 @@ class LocationApp {
             {
                 enableHighAccuracy: true,
                 timeout: 10000,
-                maximumAge: 0
+                maximumAge: 300000
             }
         );
     }
@@ -478,11 +483,17 @@ ${googleMapsUrl}
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
+        
+        let bgColor;
+        if (type === 'success') bgColor = 'var(--success-gradient)';
+        else if (type === 'warning') bgColor = 'var(--warning-gradient)';
+        else bgColor = 'var(--error)';
+        
         notification.style.cssText = `
             position: fixed;
             top: 100px;
             right: var(--space-lg);
-            background: ${type === 'success' ? 'var(--success-gradient)' : 'var(--error)'};
+            background: ${bgColor};
             color: white;
             padding: var(--space-md);
             border-radius: var(--radius-lg);
@@ -582,6 +593,9 @@ function fallbackCopyToClipboard(text) {
 
 // App initialisieren
 document.addEventListener('DOMContentLoaded', () => {
+    // Aktuelles Jahr im Footer setzen
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+    
     window.locationApp = new LocationApp();
     
     // Service Worker für PWA (optional)

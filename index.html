@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +15,7 @@
     <div class="app">
         <!-- Theme Toggle -->
         <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
-            🌙
+            ☀️
         </button>
 
         <!-- Hero Section -->
@@ -45,10 +45,8 @@
 
         <!-- Main Content -->
         <main class="container">
-            <h2 class="app-title">Standort abrufen und teilen</h2>
-            
-            <button id="getLocationBtn" class="btn btn-primary pulse">
-                📍 Meinen Standort abrufen
+            <button id="getLocationBtn" class="btn btn-primary btn-extra-large pulse">
+                📍 Standort abrufen und teilen
             </button>
             
             <div id="locationInfo" class="format-grid hidden">
@@ -87,8 +85,7 @@
                 </div>
                 
                 <div class="share-section">
-                    <h3 class="subsection-title">📤 Standort teilen</h3>
-                    <button id="shareBtn" class="btn btn-secondary">🚀 Alle Formate teilen</button>
+                    <button id="shareBtn" class="btn btn-secondary btn-large">📤 Standort teilen</button>
                 </div>
             </div>
             
@@ -97,7 +94,7 @@
 
         <!-- Footer -->
         <footer style="text-align: center; color: rgba(255,255,255,0.7); padding: var(--space-md);">
-            <p>© 2024 MEUSE24 • GeoShare • Entwickelt mit modernen Web-Technologien</p>
+            <p>© <span id="currentYear"></span> MEUSE24 • GeoShare • Entwickelt mit modernen Web-Technologien & Claude Code</p>
         </footer>
     </div>
     
