@@ -201,8 +201,18 @@ class LocationApp {
     }
 
     initMap() {
+        const mapElement = document.getElementById('map');
+        
         // Warten bis DOM bereit ist
-        if (!document.getElementById('map')) {
+        if (!mapElement) {
+            console.log('Map element not found, retrying...');
+            setTimeout(() => this.initMap(), 100);
+            return;
+        }
+        
+        // Warten bis Leaflet geladen ist
+        if (typeof L === 'undefined') {
+            console.log('Leaflet not loaded, retrying...');
             setTimeout(() => this.initMap(), 100);
             return;
         }
@@ -212,6 +222,12 @@ class LocationApp {
         const defaultLng = 13.4050;
         
         try {
+            // Karte löschen falls bereits vorhanden
+            if (this.map) {
+                this.map.remove();
+            }
+            
+            // Neue Karte erstellen
             this.map = L.map('map').setView([defaultLat, defaultLng], 13);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -223,6 +239,7 @@ class LocationApp {
             
         } catch (error) {
             console.error('Fehler beim Initialisieren der Karte:', error);
+            this.showMapError();
         }
     }
 
@@ -287,13 +304,15 @@ class LocationApp {
         
         if (this.mapVisible) {
             // Karte ausblenden
-            mapContainer.style.display = 'none';
-            mapContainer.innerHTML = '<div style="height: 100%; display: flex; align-items: center; justify-content: center; color: #718096; background: #f7fafc; border-radius: 8px;">Karte ist ausgeblendet</div>';
+            if (this.map) {
+                this.map.remove();
+                this.map = null;
+            }
+            mapContainer.innerHTML = '<div class="map-placeholder">Karte ist ausgeblendet</div>';
             toggleBtn.textContent = 'Karte einblenden';
             this.mapVisible = false;
         } else {
             // Karte einblenden
-            mapContainer.style.display = 'block';
             mapContainer.innerHTML = '';
             toggleBtn.textContent = 'Karte ausblenden';
             this.mapVisible = true;
@@ -305,6 +324,22 @@ class LocationApp {
                     this.updateMap();
                 }
             }, 100);
+        }
+    }
+
+    showMapError() {
+        const mapContainer = document.getElementById('map');
+        if (mapContainer) {
+            mapContainer.innerHTML = `
+                <div class="map-placeholder">
+                    <div style="text-align: center;">
+                        <div style="margin-bottom: 0.5rem;">⚠️ Karte konnte nicht geladen werden</div>
+                        <div style="font-size: 0.9em; color: #a0aec0;">
+                            Möglicherweise ist keine Internetverbindung verfügbar
+                        </div>
+                    </div>
+                </div>
+            `;
         }
     }
 }
