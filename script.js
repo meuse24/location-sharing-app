@@ -4,6 +4,7 @@ class LocationApp {
         this.map = null;
         this.marker = null;
         this.mapVisible = true;
+        this.theme = localStorage.getItem('theme') || 'light';
         this.init();
     }
 
@@ -12,13 +13,17 @@ class LocationApp {
         const shareBtn = document.getElementById('shareBtn');
         const centerMapBtn = document.getElementById('centerMapBtn');
         const toggleMapBtn = document.getElementById('toggleMapBtn');
+        const themeToggle = document.getElementById('themeToggle');
         
         getLocationBtn.addEventListener('click', () => this.getCurrentLocation());
         shareBtn.addEventListener('click', () => this.shareLocation());
         centerMapBtn.addEventListener('click', () => this.centerMap());
         toggleMapBtn.addEventListener('click', () => this.toggleMap());
+        themeToggle.addEventListener('click', () => this.toggleTheme());
         
+        this.initTheme();
         this.initMap();
+        this.addModernInteractions();
     }
 
     getCurrentLocation() {
@@ -28,8 +33,9 @@ class LocationApp {
         }
 
         const getLocationBtn = document.getElementById('getLocationBtn');
-        getLocationBtn.textContent = 'Standort wird abgerufen...';
+        getLocationBtn.innerHTML = '🔄 Standort wird abgerufen...';
         getLocationBtn.disabled = true;
+        getLocationBtn.classList.add('loading');
 
         navigator.geolocation.getCurrentPosition(
             (position) => this.onLocationSuccess(position),
@@ -218,8 +224,9 @@ ${googleMapsUrl}
 
     resetButton() {
         const getLocationBtn = document.getElementById('getLocationBtn');
-        getLocationBtn.textContent = 'Standort erneut abrufen';
+        getLocationBtn.innerHTML = '🗺️ Standort erneut abrufen';
         getLocationBtn.disabled = false;
+        getLocationBtn.classList.remove('loading');
     }
 
     showError(message) {
@@ -384,10 +391,123 @@ ${googleMapsUrl}
             `;
         }
     }
+
+    initTheme() {
+        document.documentElement.setAttribute('data-theme', this.theme);
+        this.updateThemeToggle();
+    }
+
+    toggleTheme() {
+        this.theme = this.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', this.theme);
+        localStorage.setItem('theme', this.theme);
+        this.updateThemeToggle();
+        this.showNotification(`${this.theme === 'dark' ? '🌙 Dark' : '☀️ Light'} Mode aktiviert`);
+    }
+
+    updateThemeToggle() {
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.textContent = this.theme === 'light' ? '🌙' : '☀️';
+        themeToggle.setAttribute('aria-label', `Zu ${this.theme === 'light' ? 'Dark' : 'Light'} Mode wechseln`);
+    }
+
+    addModernInteractions() {
+        // Button hover effects
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'translateY(-2px)';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = '';
+            });
+        });
+
+        // Feature card interactions
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            },
+            { threshold: 0.1 }
+        );
+
+        document.querySelectorAll('.format-section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(section);
+        });
+    }
+
+    showNotification(message, type = 'success') {
+        // Remove existing notification
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: var(--space-lg);
+            background: ${type === 'success' ? 'var(--success-gradient)' : 'var(--error)'};
+            color: white;
+            padding: var(--space-md);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform var(--transition-base);
+            max-width: 300px;
+            word-wrap: break-word;
+        `;
+
+        document.body.appendChild(notification);
+
+        // Slide in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+
+        // Auto remove
+        setTimeout(() => {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    addCopyFeedback(button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = '✅ Kopiert!';
+        button.style.background = 'var(--success-gradient)';
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.style.background = '';
+        }, 2000);
+    }
 }
 
 function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);
+    const button = event.target;
     let textToCopy = element.textContent;
     
     if (elementId === 'googleMaps') {
@@ -400,7 +520,8 @@ function copyToClipboard(elementId) {
     if (navigator.clipboard) {
         navigator.clipboard.writeText(textToCopy)
             .then(() => {
-                showCopyFeedback();
+                window.locationApp.addCopyFeedback(button);
+                window.locationApp.showNotification(`📋 ${getFormatName(elementId)} in Zwischenablage kopiert!`);
             })
             .catch(err => {
                 console.error('Fehler beim Kopieren:', err);
@@ -409,6 +530,15 @@ function copyToClipboard(elementId) {
     } else {
         fallbackCopyToClipboard(textToCopy);
     }
+}
+
+function getFormatName(elementId) {
+    const names = {
+        'decimal': 'Dezimalkoordinaten',
+        'dms': 'DMS Koordinaten', 
+        'googleMaps': 'Google Maps Link'
+    };
+    return names[elementId] || 'Inhalt';
 }
 
 function fallbackCopyToClipboard(text) {
@@ -433,33 +563,23 @@ function fallbackCopyToClipboard(text) {
     document.body.removeChild(textArea);
 }
 
-function showCopyFeedback() {
-    const feedback = document.createElement('div');
-    feedback.textContent = 'In Zwischenablage kopiert!';
-    feedback.style.cssText = `
-        position: fixed; top: 20px; right: 20px; background: #48bb78;
-        color: white; padding: 1rem; border-radius: 5px; z-index: 1000;
-        animation: fadeInOut 2s ease-in-out;
-    `;
-    
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; transform: translateY(-10px); }
-            20%, 80% { opacity: 1; transform: translateY(0); }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    document.body.appendChild(feedback);
-    
-    setTimeout(() => {
-        document.body.removeChild(feedback);
-        document.head.removeChild(style);
-    }, 2000);
-}
+// Removed - replaced with modern notification system
 
 // App initialisieren
 document.addEventListener('DOMContentLoaded', () => {
-    new LocationApp();
+    window.locationApp = new LocationApp();
+    
+    // Service Worker für PWA (optional)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('Service Worker registriert'))
+            .catch(() => console.log('Service Worker nicht verfügbar'));
+    }
+    
+    // Installable Web App Prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        deferredPrompt = e;
+        window.locationApp.showNotification('📥 App kann installiert werden!');
+    });
 });

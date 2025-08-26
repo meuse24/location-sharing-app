@@ -3,58 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Standort Teilen</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>MEUSE24 • GeoShare - Moderne Standort-Freigabe</title>
+    <meta name="description" content="Teile deinen Standort einfach und präzise in verschiedenen Formaten mit interaktiver Karte">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Mein Standort</h1>
-        
-        <button id="getLocationBtn" class="btn-primary">Standort abrufen</button>
-        
-        <div id="locationInfo" class="location-info hidden">
-            <h2>Aktuelle Position:</h2>
+    <div class="app">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
+            🌙
+        </button>
+
+        <!-- Hero Section -->
+        <header class="hero-section">
+            <h1 class="brand-title">MEUSE24 • GeoShare</h1>
+            <p class="brand-subtitle">Moderne Standort-Freigabe für alle Geräte</p>
             
-            <div class="format-section">
-                <h3>Koordinaten (Dezimal)</h3>
-                <div id="decimal" class="coordinate-display"></div>
-                <button class="copy-btn" onclick="copyToClipboard('decimal')">Kopieren</button>
+            <!-- Feature Grid -->
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">📍</span>
+                    <h3 class="feature-title">Präzise Lokalisierung</h3>
+                    <p class="feature-description">GPS-basierte Standortbestimmung mit Genauigkeitsanzeige</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🗺️</span>
+                    <h3 class="feature-title">Interaktive Karte</h3>
+                    <p class="feature-description">OpenStreetMap Integration mit Zoom und Navigation</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📤</span>
+                    <h3 class="feature-title">Vielseitiges Teilen</h3>
+                    <p class="feature-description">Koordinaten, Links und Karten in einem Paket</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📱</span>
+                    <h3 class="feature-title">Responsive Design</h3>
+                    <p class="feature-description">Perfekt optimiert für Mobile und Desktop</p>
+                </div>
             </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container">
+            <h2 class="app-title">Standort abrufen und teilen</h2>
             
-            <div class="format-section">
-                <h3>Koordinaten (Grad, Minuten, Sekunden)</h3>
-                <div id="dms" class="coordinate-display"></div>
-                <button class="copy-btn" onclick="copyToClipboard('dms')">Kopieren</button>
-            </div>
+            <button id="getLocationBtn" class="btn btn-primary pulse">
+                📍 Meinen Standort abrufen
+            </button>
             
-            <div class="format-section">
-                <h3>Google Maps Link</h3>
-                <div id="googleMaps" class="coordinate-display"></div>
-                <button class="copy-btn" onclick="copyToClipboard('googleMaps')">Kopieren</button>
-            </div>
-            
-            <div class="format-section">
-                <h3>What3Words (falls verfügbar)</h3>
-                <div id="what3words" class="coordinate-display">Standort zu ungenau für What3Words</div>
-            </div>
-            
-            <div class="format-section">
-                <h3>Interaktive Karte</h3>
-                <div id="map" class="map-container"></div>
-                <div class="map-controls">
-                    <button id="centerMapBtn" class="copy-btn">Karte zentrieren</button>
-                    <button id="toggleMapBtn" class="copy-btn">Karte ein-/ausblenden</button>
+            <div id="locationInfo" class="format-grid hidden">
+                <h2 class="section-title">🎯 Deine aktuelle Position</h2>
+                
+                <div class="format-section">
+                    <h3 class="subsection-title">📐 Koordinaten (Dezimal)</h3>
+                    <div id="decimal" class="coordinate-display"></div>
+                    <button class="btn btn-copy" onclick="copyToClipboard('decimal')">📋 Kopieren</button>
+                </div>
+                
+                <div class="format-section">
+                    <h3 class="subsection-title">🧭 Koordinaten (Grad, Minuten, Sekunden)</h3>
+                    <div id="dms" class="coordinate-display"></div>
+                    <button class="btn btn-copy" onclick="copyToClipboard('dms')">📋 Kopieren</button>
+                </div>
+                
+                <div class="format-section">
+                    <h3 class="subsection-title">🔗 Google Maps Link</h3>
+                    <div id="googleMaps" class="coordinate-display"></div>
+                    <button class="btn btn-copy" onclick="copyToClipboard('googleMaps')">📋 Kopieren</button>
+                </div>
+                
+                <div class="format-section">
+                    <h3 class="subsection-title">🎯 What3Words</h3>
+                    <div id="what3words" class="coordinate-display">Standort zu ungenau für What3Words</div>
+                </div>
+                
+                <div class="format-section">
+                    <h3 class="subsection-title">🗺️ Interaktive Karte</h3>
+                    <div id="map" class="map-container"></div>
+                    <div class="map-controls">
+                        <button id="centerMapBtn" class="btn btn-copy">🎯 Zentrieren</button>
+                        <button id="toggleMapBtn" class="btn btn-copy">👁️ Ein-/ausblenden</button>
+                    </div>
+                </div>
+                
+                <div class="share-section">
+                    <h3 class="subsection-title">📤 Standort teilen</h3>
+                    <button id="shareBtn" class="btn btn-secondary">🚀 Alle Formate teilen</button>
                 </div>
             </div>
             
-            <div class="share-section">
-                <h3>Teilen:</h3>
-                <button id="shareBtn" class="btn-secondary">Über Gerät teilen</button>
-            </div>
-        </div>
-        
-        <div id="error" class="error hidden"></div>
+            <div id="error" class="error hidden"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer style="text-align: center; color: rgba(255,255,255,0.7); padding: var(--space-md);">
+            <p>© 2024 MEUSE24 • GeoShare • Entwickelt mit ❤️ und modernen Web-Technologien</p>
+        </footer>
     </div>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
