@@ -18,8 +18,8 @@ body {
     background: white;
     border-radius: 15px;
     padding: 2rem;
-    max-width: 600px;
-    width: 90%;
+    max-width: 800px;
+    width: 95%;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
@@ -142,10 +142,54 @@ h3 {
     }
 }
 
+.map-container {
+    height: 300px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+    background: #f7fafc;
+    position: relative;
+    overflow: hidden;
+}
+
+.map-controls {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.map-controls .copy-btn {
+    margin: 0;
+}
+
+.leaflet-container {
+    height: 100%;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.map-hidden .map-container {
+    height: 60px;
+    background: #f7fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #718096;
+    font-style: italic;
+}
+
+.map-hidden .leaflet-container {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 1.5rem;
         margin: 1rem;
+        max-width: none;
+        width: 90%;
     }
     
     h1 {
@@ -154,5 +198,14 @@ h3 {
     
     .format-section {
         padding: 0.75rem;
+    }
+    
+    .map-container {
+        height: 250px;
+    }
+    
+    .map-controls .copy-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
     }
 }

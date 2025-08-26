@@ -1,15 +1,24 @@
 class LocationApp {
     constructor() {
         this.currentLocation = null;
+        this.map = null;
+        this.marker = null;
+        this.mapVisible = true;
         this.init();
     }
 
     init() {
         const getLocationBtn = document.getElementById('getLocationBtn');
         const shareBtn = document.getElementById('shareBtn');
+        const centerMapBtn = document.getElementById('centerMapBtn');
+        const toggleMapBtn = document.getElementById('toggleMapBtn');
         
         getLocationBtn.addEventListener('click', () => this.getCurrentLocation());
         shareBtn.addEventListener('click', () => this.shareLocation());
+        centerMapBtn.addEventListener('click', () => this.centerMap());
+        toggleMapBtn.addEventListener('click', () => this.toggleMap());
+        
+        this.initMap();
     }
 
     getCurrentLocation() {
@@ -92,6 +101,9 @@ class LocationApp {
         } else {
             what3wordsEl.textContent = 'What3Words: Für genaue Adresse What3Words App verwenden';
         }
+        
+        // Karte aktualisieren
+        this.updateMap();
 
         document.getElementById('locationInfo').classList.remove('hidden');
     }
@@ -186,6 +198,105 @@ class LocationApp {
 
     hideError() {
         document.getElementById('error').classList.add('hidden');
+    }
+
+    initMap() {
+        // Standardposition (Berlin) falls noch kein Standort verfügbar
+        const defaultLat = 52.5200;
+        const defaultLng = 13.4050;
+        
+        try {
+            this.map = L.map('map').setView([defaultLat, defaultLng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(this.map);
+            
+            // Karte anfangs ausblenden
+            this.toggleMap();
+            
+        } catch (error) {
+            console.error('Fehler beim Initialisieren der Karte:', error);
+        }
+    }
+
+    updateMap() {
+        if (!this.map || !this.currentLocation) return;
+        
+        const { latitude, longitude, accuracy } = this.currentLocation;
+        
+        // Karte zur neuen Position bewegen
+        this.map.setView([latitude, longitude], 15);
+        
+        // Alten Marker entfernen falls vorhanden
+        if (this.marker) {
+            this.map.removeLayer(this.marker);
+        }
+        
+        // Neuen Marker hinzufügen
+        this.marker = L.marker([latitude, longitude])
+            .addTo(this.map)
+            .bindPopup(`
+                <strong>Deine Position</strong><br>
+                ${latitude.toFixed(6)}, ${longitude.toFixed(6)}<br>
+                Genauigkeit: ±${Math.round(accuracy)}m
+            `);
+        
+        // Genauigkeitskreis hinzufügen falls Genauigkeit verfügbar
+        if (accuracy && accuracy < 1000) {
+            L.circle([latitude, longitude], {
+                radius: accuracy,
+                color: '#667eea',
+                fillColor: '#667eea',
+                fillOpacity: 0.1,
+                weight: 2
+            }).addTo(this.map);
+        }
+        
+        // Karte anzeigen falls versteckt
+        if (!this.mapVisible) {
+            this.toggleMap();
+        }
+    }
+
+    centerMap() {
+        if (!this.map || !this.currentLocation) {
+            this.showError('Kein Standort verfügbar zum Zentrieren der Karte.');
+            return;
+        }
+        
+        const { latitude, longitude } = this.currentLocation;
+        this.map.setView([latitude, longitude], 15);
+        
+        if (this.marker) {
+            this.marker.openPopup();
+        }
+    }
+
+    toggleMap() {
+        const mapContainer = document.querySelector('.format-section:has(#map)');
+        const toggleBtn = document.getElementById('toggleMapBtn');
+        
+        if (this.mapVisible) {
+            mapContainer.classList.add('map-hidden');
+            toggleBtn.textContent = 'Karte einblenden';
+            document.getElementById('map').innerHTML = '<div style="height: 100%; display: flex; align-items: center; justify-content: center; color: #718096;">Karte ist ausgeblendet</div>';
+        } else {
+            mapContainer.classList.remove('map-hidden');
+            toggleBtn.textContent = 'Karte ausblenden';
+            // Karte neu initialisieren wenn eingeblendet
+            setTimeout(() => {
+                if (this.map) {
+                    this.map.invalidateSize();
+                    if (this.currentLocation) {
+                        this.updateMap();
+                    }
+                }
+            }, 100);
+        }
+        
+        this.mapVisible = !this.mapVisible;
     }
 }
 

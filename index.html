@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Standort Teilen</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 <body>
     <div class="container">
@@ -38,6 +39,15 @@
                 <div id="what3words" class="coordinate-display">Standort zu ungenau für What3Words</div>
             </div>
             
+            <div class="format-section">
+                <h3>Interaktive Karte</h3>
+                <div id="map" class="map-container"></div>
+                <div class="map-controls">
+                    <button id="centerMapBtn" class="copy-btn">Karte zentrieren</button>
+                    <button id="toggleMapBtn" class="copy-btn">Karte ein-/ausblenden</button>
+                </div>
+            </div>
+            
             <div class="share-section">
                 <h3>Teilen:</h3>
                 <button id="shareBtn" class="btn-secondary">Über Gerät teilen</button>
@@ -47,6 +57,7 @@
         <div id="error" class="error hidden"></div>
     </div>
     
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="script.js"></script>
 </body>
 </html>
